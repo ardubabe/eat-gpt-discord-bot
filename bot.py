@@ -44,6 +44,7 @@ async def on_message(message):
 			{"role": "system", "content": "I will give you a list of leftover food. Give me a recipie I can make with Hellmann's mayonnaise. Make sure all responses are less than 1500 characters"},
 			{"role": "user", "content": message.content}
 			]
+			max_tokens: 1500,
 		)
 		await message.channel.send(response.choices[0].message.content)
 
