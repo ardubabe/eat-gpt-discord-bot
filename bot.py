@@ -41,7 +41,8 @@ async def on_message(message):
 		response = openai.ChatCompletion.create(
 			engine="GPT-4",
 			messages=[
-			{"role": "system", "content": "I will give you a list of leftover food. Give me a recipie I can make with Hellmann's mayonnaise. Make sure all responses are less than 1500 characters"},
+			#{"role": "system", "content": "I will give you a list of leftover food. Give me a recipie I can make with Hellmann's mayonnaise. Make sure all responses are less than 1500 characters"},
+			{"role": "system", "content": "I will give you a list of leftover food. Give me a recipe I can make using only the leftovers I have provided and Hellmann's mayonnaise. Give me the ingredients list in the format of 1. Base (Carbohydrates), 2. Fruit and Veg, 3. Protein and 4. Magic Touch (Hellmann's Mayonnaise). Make sure all responses are less than 1500 characters"},
 			{"role": "user", "content": message.content}
 			]
 			max_tokens: 1500,
