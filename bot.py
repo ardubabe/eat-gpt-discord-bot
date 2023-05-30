@@ -10,7 +10,7 @@ openai.api_type = "azure"
 openai.api_version = "2023-03-15-preview"
 
 # specifying our server
-GUILD = "{Creative-Tech-Apprenticeship}"
+GUILD = "{ardubabe's server}"
 
 # create an object that will control our discord bot
 client = discord.Client(intents=discord.Intents.default())
