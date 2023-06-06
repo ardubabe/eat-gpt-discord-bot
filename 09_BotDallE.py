@@ -16,8 +16,8 @@ with open("keys.txt") as f:
 	# openai api key
 	openai.api_key = lines[1]
 	# discord token
-	DISCORD_TOKEN = lines[3]
-	openai.api_base = lines[5]
+	DISCORD_TOKEN = lines[7]
+	openai.api_base = lines[9]
 # close the file
 f.close()
 
