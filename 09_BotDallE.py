@@ -5,7 +5,7 @@ openai.api_type = "azure"
 openai.api_version = "2023-03-15-preview"
 
 # specifying our server
-GUILD = "{Creative-Tech-Apprenticeship}"
+GUILD = "{ardubabe's server}"
 
 # create an object that will control our discord bot
 client = discord.Client(intents=discord.Intents.default())
@@ -14,10 +14,10 @@ with open("keys.txt") as f:
 	# converting our text file to a list of lines
 	lines = f.read().split('\n')
 	# openai api key
-	openai.api_key = lines[0]
+	openai.api_key = lines[1]
 	# discord token
-	DISCORD_TOKEN = lines[1]
-	openai.api_base = lines[2]
+	DISCORD_TOKEN = lines[3]
+	openai.api_base = lines[5]
 # close the file
 f.close()
 
