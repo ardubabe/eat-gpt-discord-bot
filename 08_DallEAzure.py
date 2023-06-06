@@ -6,10 +6,10 @@ with open("keys.txt") as f:
     # converting our text file to a list of lines
     lines = f.read().split('\n')
     # openai api key
-    api_key = lines[0]
+    api_key = lines[1]
     # discord token
-    DISCORD_TOKEN = lines[1]
-    api_base = lines[2]
+    DISCORD_TOKEN = lines[7]
+    api_base = lines[9]
 # close the file
 f.close()
 
