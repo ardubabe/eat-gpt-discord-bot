@@ -39,18 +39,19 @@ async def on_message(message):
 	
 	# if the message mentions the bot, then do something
 	if client.user.mentioned_in(message): 
-		response = openai.ChatCompletion.create(
-			engine="GPT-4",
-			#max_tokens=1600,
-			messages=[
-			#{"role": "system", "content": "I will give you a list of leftover food. Give me a recipie I can make with Hellmann's mayonnaise. Make sure all responses are less than 1500 characters"},
-			{"role": "system", "content": "I will give you a list of leftover food. Give me a recipe I can make using only the leftovers I have provided and Hellmann's mayonnaise. Provide the dish name, don't title it dish name. Then give me the ingredients list in the format of '- Base, - Fruit and Veg, - Protein and - Magic Touch'. Base is carbohydrates, and magic touch is always Hellmann's Mayonnaise. Then give me the instructions to make the meal in simple terms. Make sure all responses are less than 1500 characters"},
-			{"role": "user", "content": message.content}
-			]
-		)
-		await message.channel.send(response.choices[0].message.content)
-	elif any(greeting in message.content.lower() for greeting in ['hi', 'hello', 'hey']):
-		respone = "Hi, I'm your leftovers bot! Please give me a list of your leftovers, and I will generate a recipe for you. Don't forget to mention me @eat-gpt in the message!"
-		await message.channel.send(response)
+		if any(greeting in message.content.lower() for greeting in ['hi', 'hello', 'hey']):
+			respone = "Hi, I'm your leftovers bot! Please give me a list of your leftovers, and I will generate a recipe for you. Don't forget to mention me @eat-gpt in the message!"
+			await message.channel.send(response)
+		else:
+			response = openai.ChatCompletion.create(
+				engine="GPT-4",
+				#max_tokens=1600,
+				messages=[
+				#{"role": "system", "content": "I will give you a list of leftover food. Give me a recipie I can make with Hellmann's mayonnaise. Make sure all responses are less than 1500 characters"},
+				{"role": "system", "content": "I will give you a list of leftover food. Give me a recipe I can make using only the leftovers I have provided and Hellmann's mayonnaise. Provide the dish name, don't title it dish name. Then give me the ingredients list in the format of '- Base, - Fruit and Veg, - Protein and - Magic Touch'. Base is carbohydrates, and magic touch is always Hellmann's Mayonnaise. Then give me the instructions to make the meal in simple terms. Make sure all responses are less than 1500 characters"},
+				{"role": "user", "content": message.content}
+				]
+			)
+			await message.channel.send(response.choices[0].message.content)
 
 client.run(DISCORD_TOKEN)
