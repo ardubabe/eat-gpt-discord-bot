@@ -36,6 +36,7 @@ async def on_message(message):
 	# ignore @everyone mentions
 	if message.mention_everyone:
 		return
+	
 	# if the message mentions the bot, then do something
 	elif client.user.mentioned_in(message): 
 		response = openai.ChatCompletion.create(
@@ -48,5 +49,11 @@ async def on_message(message):
 			]
 		)
 		await message.channel.send(response.choices[0].message.content)
+	elif any(greeting in message.content.lower() for greeting in ['hi', 'hello', 'hey']):
+		respone = "Hi, I'm your leftovers bot! Please give me a list of your leftovers, and I will generate a recipe for you. Don't forget to mention me @eat-gpt in the message!"
+		await message.channel.send(response)
+    # elif any(greeting in message.content.lower() for greeting in ['hi', 'hello', 'hey']):
+    #     response = "Hi, I'm your leftovers bot! Please give me a list of your leftovers, and I will generate a recipe for you."
+    #     await message.channel.send(response)
 
 client.run(DISCORD_TOKEN)
