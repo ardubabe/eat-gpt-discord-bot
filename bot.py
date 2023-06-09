@@ -52,8 +52,5 @@ async def on_message(message):
 	elif any(greeting in message.content.lower() for greeting in ['hi', 'hello', 'hey']):
 		respone = "Hi, I'm your leftovers bot! Please give me a list of your leftovers, and I will generate a recipe for you. Don't forget to mention me @eat-gpt in the message!"
 		await message.channel.send(response)
-    # elif any(greeting in message.content.lower() for greeting in ['hi', 'hello', 'hey']):
-    #     response = "Hi, I'm your leftovers bot! Please give me a list of your leftovers, and I will generate a recipe for you."
-    #     await message.channel.send(response)
 
 client.run(DISCORD_TOKEN)
