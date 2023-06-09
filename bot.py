@@ -38,7 +38,7 @@ async def on_message(message):
 		return
 	
 	# if the message mentions the bot, then do something
-	elif client.user.mentioned_in(message): 
+	if client.user.mentioned_in(message): 
 		response = openai.ChatCompletion.create(
 			engine="GPT-4",
 			#max_tokens=1600,
