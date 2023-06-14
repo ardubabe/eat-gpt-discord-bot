@@ -4,6 +4,16 @@ import os
 from PIL import Image
 import discord
 import openai
+import logging
+
+logging.basicConfig(level=logging.INFO)  
+logging.info('Worker script started')  
+
+openai.api_type = "azure"
+openai.api_version = "2023-03-15-preview"
+
+# specifying our server
+GUILD = "{ardubabe's server}"
 
 # create an object that will control our discord bot
 client = discord.Client(intents=discord.Intents.default())
