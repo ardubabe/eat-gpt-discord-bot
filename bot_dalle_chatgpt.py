@@ -5,13 +5,12 @@ from PIL import Image
 import discord
 import openai
 
-# Discord bot setup
+# create an object that will control our discord bot
 client = discord.Client(intents=discord.Intents.default())
-
-# OpenAI API setup
-openai.api_key = os.environ.get("OPENAI_API_KEY")
-openai.api_base = os.environ.get("OPENAI_API_BASE")
-openai.api_version = "2022-08-03-preview"
+# env variables to be read by railway 
+openai.api_key = os.environ.get("API_KEY")
+DISCORD_TOKEN = os.environ.get("DISCORD_TOKEN")
+openai.api_base = os.environ.get("API_BASE")
 
 # DALL-E image generation function
 def generate_dalle_image(caption):
@@ -64,4 +63,4 @@ async def on_message(message):
             image_url = generate_dalle_image(dish_name)
             await message.channel.send(image_url)
 
-client.run(os.environ.get("DISCORD_TOKEN"))
+client.run(DISCORD_TOKEN)
