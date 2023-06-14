@@ -36,50 +36,54 @@ async def on_message(message):
         return
     
     if client.user.mentioned_in(message):
-        # Generate recipe using OpenAI Chat API
-        response = openai.ChatCompletion.create(
-            engine="GPT-4",
-            messages=[
-                {"role": "system", "content": "I will give you a list of leftover food. Give me a recipe I can make using only the leftovers I have provided and Hellmann's mayonnaise. Provide the dish name, don't title it dish name. Then give me the ingredients list in the format of '- Base, - Fruit and Veg, - Protein and - Magic Touch'. Base is carbohydrates, and magic touch is always Hellmann's Mayonnaise. Then give me the instructions to make the meal in simple terms. Make sure all responses are less than 1500 characters"},
-                {"role": "user", "content": message.content}
-            ]
-        )
-        recipe = response.choices[0].message.content
+        if any(greeting in message.content.lower() for greeting in ['hi', 'hello', 'hey']):
+            response = "Hi, I'm your leftovers bot! Please give me a list of your leftovers, and I will generate a recipe for you. Don't forget to mention me @hogarth-leftovers-bot-demo in the message!"
+            await message.channel.send(response)
+        else:
+            # Generate recipe using OpenAI Chat API
+            response = openai.ChatCompletion.create(
+                engine="GPT-4",
+                messages=[
+                    {"role": "system", "content": "I will give you a list of leftover food. Give me a recipe I can make using only the leftovers I have provided and Hellmann's mayonnaise. Provide the dish name, don't title it dish name. Then give me the ingredients list in the format of '- Base, - Fruit and Veg, - Protein and - Magic Touch'. Base is carbohydrates, and magic touch is always Hellmann's Mayonnaise. Then give me the instructions to make the meal in simple terms. Make sure all responses are less than 1500 characters"},
+                    {"role": "user", "content": message.content}
+                ]
+            )
+            recipe = response.choices[0].message.content
 
-        # Extract the dish name from the recipe response
-        dish_name = recipe.splitlines()[0]
+            # Extract the dish name from the recipe response
+            dish_name = recipe.splitlines()[0]
 
-        # Generate DALL-E image using OpenAI API
-        url = "{}dalle/text-to-image?api-version={}".format(openai.api_base, openai.api_version)
-        headers = {"api-key": openai.api_key, "Content-Type": "application/json"}
-        body = {
-            "caption": dish_name,
-            "resolution": "1024x1024"
-        }
-        try:
-            submission = requests.post(url, headers=headers, json=body)
-            submission.raise_for_status()
+            # Generate DALL-E image using OpenAI API
+            url = "{}dalle/text-to-image?api-version={}".format(openai.api_base, openai.api_version)
+            headers = {"api-key": openai.api_key, "Content-Type": "application/json"}
+            body = {
+                "caption": dish_name,
+                "resolution": "1024x1024"
+            }
+            try:
+                submission = requests.post(url, headers=headers, json=body)
+                submission.raise_for_status()
 
-            if 'Operation-Location' in submission.headers:
-                operation_location = submission.headers['Operation-Location']
-                retry_after = submission.headers.get('Retry-after', '1')
-                status = ""
+                if 'Operation-Location' in submission.headers:
+                    operation_location = submission.headers['Operation-Location']
+                    retry_after = submission.headers.get('Retry-after', '1')
+                    status = ""
 
-                # Wait for image generation to complete
-                while status != "Succeeded":
-                    time.sleep(int(retry_after))
-                    response = requests.get(operation_location, headers=headers)
-                    response.raise_for_status()
-                    status = response.json()['status']
-                image_url = response.json()['result']['contentUrl']
+                    # Wait for image generation to complete
+                    while status != "Succeeded":
+                        time.sleep(int(retry_after))
+                        response = requests.get(operation_location, headers=headers)
+                        response.raise_for_status()
+                        status = response.json()['status']
+                    image_url = response.json()['result']['contentUrl']
 
-                # Send recipe and image URLs as responses to the Discord channel
-                await message.channel.send(recipe)
-                await message.channel.send(image_url)
-            else:
+                    # Send recipe and image URLs as responses to the Discord channel
+                    await message.channel.send(recipe)
+                    await message.channel.send(image_url)
+                else:
+                    await message.channel.send("Sorry, an error occurred while generating the DALL-E image.")
+            except requests.exceptions.RequestException as e:
                 await message.channel.send("Sorry, an error occurred while generating the DALL-E image.")
-        except requests.exceptions.RequestException as e:
-            await message.channel.send("Sorry, an error occurred while generating the DALL-E image.")
-            logging.error(str(e))
+                logging.error(str(e))
 
 client.run(DISCORD_TOKEN)
