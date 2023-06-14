@@ -32,6 +32,7 @@ def generate_dalle_image(caption):
     }
     submission = requests.post(url, headers=headers, json=body)
     operation_location = submission.headers['Operation-Location']
+    print({submission.headers})
     retry_after = submission.headers['Retry-after']
     status = ""
     while status != "Succeeded":
