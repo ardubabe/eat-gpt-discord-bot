@@ -1,46 +1,54 @@
-import logging
-import os
 import requests
 import time
+import os
 from PIL import Image
 import discord
 import openai
 
-logging.basicConfig(level=logging.INFO)
-logging.info('Worker script started')
-
-openai.api_type = "azure"
-openai.api_version = "2023-03-15-preview"
-
-# specifying our server
-GUILD = "{ardubabe's server}"
-
-# create an object that will control our discord bot
+# Discord bot setup
 client = discord.Client(intents=discord.Intents.default())
-# env variables to be read by railway
-openai.api_key = os.environ.get("API_KEY")
-DISCORD_TOKEN = os.environ.get("DISCORD_TOKEN")
-openai.api_base = os.environ.get("API_BASE")
+
+# OpenAI API setup
+openai.api_key = os.environ.get("OPENAI_API_KEY")
+openai.api_base = os.environ.get("OPENAI_API_BASE")
+openai.api_version = "2022-08-03-preview"
+
+# DALL-E image generation function
+def generate_dalle_image(caption):
+    url = f"{openai.api_base}dalle/text-to-image?api-version={openai.api_version}"
+    headers = {"api-key": openai.api_key, "Content-Type": "application/json"}
+    body = {
+        "caption": caption,
+        "resolution": "1024x1024"
+    }
+    submission = requests.post(url, headers=headers, json=body)
+    operation_location = submission.headers['Operation-Location']
+    retry_after = submission.headers['Retry-after']
+    status = ""
+    while status != "Succeeded":
+        time.sleep(int(retry_after))
+        response = requests.get(operation_location, headers=headers)
+        status = response.json()['status']
+    image_url = response.json()['result']['contentUrl']
+    return image_url
 
 @client.event
 async def on_ready():
-    for guild in client.guilds:
-        if guild.name == GUILD:
-            break
-    # print out a nice statement saying our bot is online (only in command prompt)
     print(f'{client.user} has connected to Discord!')
 
 @client.event
 async def on_message(message):
-    if message.author == client.user or message.mention_everyone:
+    if message.author == client.user:
         return
-    
+
+    if message.mention_everyone:
+        return
+
     if client.user.mentioned_in(message):
         if any(greeting in message.content.lower() for greeting in ['hi', 'hello', 'hey']):
             response = "Hi, I'm your leftovers bot! Please give me a list of your leftovers, and I will generate a recipe for you. Don't forget to mention me @hogarth-leftovers-bot-demo in the message!"
             await message.channel.send(response)
         else:
-            # Generate recipe using OpenAI Chat API
             response = openai.ChatCompletion.create(
                 engine="GPT-4",
                 messages=[
@@ -49,41 +57,11 @@ async def on_message(message):
                 ]
             )
             recipe = response.choices[0].message.content
+            recipe_lines = recipe.split('\n')
+            dish_name = recipe_lines[0]
 
-            # Extract the dish name from the recipe response
-            dish_name = recipe.splitlines()[0]
+            await message.channel.send(recipe)
+            image_url = generate_dalle_image(dish_name)
+            await message.channel.send(image_url)
 
-            # Generate DALL-E image using OpenAI API
-            url = "{}dalle/text-to-image?api-version={}".format(openai.api_base, openai.api_version)
-            headers = {"api-key": openai.api_key, "Content-Type": "application/json"}
-            body = {
-                "caption": dish_name,
-                "resolution": "1024x1024"
-            }
-            try:
-                submission = requests.post(url, headers=headers, json=body)
-                submission.raise_for_status()
-
-                if 'Operation-Location' in submission.headers:
-                    operation_location = submission.headers['Operation-Location']
-                    retry_after = submission.headers.get('Retry-after', '1')
-                    status = ""
-
-                    # Wait for image generation to complete
-                    while status != "Succeeded":
-                        time.sleep(int(retry_after))
-                        response = requests.get(operation_location, headers=headers)
-                        response.raise_for_status()
-                        status = response.json()['status']
-                    image_url = response.json()['result']['contentUrl']
-
-                    # Send recipe and image URLs as responses to the Discord channel
-                    await message.channel.send(recipe)
-                    await message.channel.send(image_url)
-                else:
-                    await message.channel.send("Sorry, an error occurred while generating the DALL-E image.")
-            except requests.exceptions.RequestException as e:
-                await message.channel.send("Sorry, an error occurred while generating the DALL-E image.")
-                logging.error(str(e))
-
-client.run(DISCORD_TOKEN)
+client.run(os.environ.get("DISCORD_TOKEN"))
