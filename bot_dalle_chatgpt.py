@@ -56,24 +56,30 @@ async def on_message(message):
             "caption": dish_name,
             "resolution": "1024x1024"
         }
-        submission = requests.post(url, headers=headers, json=body)
-        if 'Operation-Location' in submission.headers:
-            operation_location = submission.headers['Operation-Location']
-            retry_after = submission.headers.get('Retry-after', '1')
-            status = ""
+        try:
+            submission = requests.post(url, headers=headers, json=body)
+            submission.raise_for_status()
 
-            # Wait for image generation to complete
-            while status != "Succeeded":
-                time.sleep(int(retry_after))
-                response = requests.get(operation_location, headers=headers)
-                status = response.json()['status']
-            image_url = response.json()['result']['contentUrl']
+            if 'Operation-Location' in submission.headers:
+                operation_location = submission.headers['Operation-Location']
+                retry_after = submission.headers.get('Retry-after', '1')
+                status = ""
 
-            # Send recipe and image URLs as responses to the Discord channel
-            await message.channel.send(recipe)
-            await message.channel.send(image_url)
-        else:
+                # Wait for image generation to complete
+                while status != "Succeeded":
+                    time.sleep(int(retry_after))
+                    response = requests.get(operation_location, headers=headers)
+                    response.raise_for_status()
+                    status = response.json()['status']
+                image_url = response.json()['result']['contentUrl']
+
+                # Send recipe and image URLs as responses to the Discord channel
+                await message.channel.send(recipe)
+                await message.channel.send(image_url)
+            else:
+                await message.channel.send("Sorry, an error occurred while generating the DALL-E image.")
+        except requests.exceptions.RequestException as e:
             await message.channel.send("Sorry, an error occurred while generating the DALL-E image.")
-            await message.channel.send(recipe)
+            logging.error(str(e))
 
 client.run(DISCORD_TOKEN)
