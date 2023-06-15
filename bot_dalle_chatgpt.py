@@ -84,6 +84,11 @@ async def on_message(message):
                 "resolution": "1024x1024"
             }
             submission = requests.post(url, headers=headers, json=body)
+            if 'operation-location' not in submission.headers:
+                logging.error("Error: 'operation-location' not found in the response headers.")
+                logging.error("Response Headers: {}".format(submission.headers))
+                await message.channel.send("An error occurred while generating the image. Please try again later.")
+                return
             operation_location = submission.headers['Operation-Location']
             retry_after = submission.headers['Retry-after']
             status = ""
