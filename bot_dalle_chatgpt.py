@@ -12,42 +12,28 @@ logging.info('Worker script started')
 # create an object that will control our discord bot
 client = discord.Client(intents=discord.Intents.default())
 
+with open("keys.txt") as f:
+    # converting our text file to a list of lines
+    lines = f.read().split('\n')
+    # openai api key
+    api_key = lines[1]
+    # discord token
+    DISCORD_TOKEN = lines[7]
+    api_base = lines[9]
+# close the file
+f.close()
+
+api_version = '2022-08-03-preview'
+
 openai.api_type = "azure"
 openai.api_version = "2023-03-15-preview"
 
 # specifying our server
 GUILD = "{ardubabe's server}"
 
-# create an object that will control our discord bot
-client = discord.Client(intents=discord.Intents.default())
-# env variables to be read by railway 
-openai.api_key = os.environ.get("API_KEY")
-DISCORD_TOKEN = os.environ.get("DISCORD_TOKEN")
-openai.api_base = os.environ.get("API_BASE")
-
-# with open("keys.txt") as f:
-#     # converting our text file to a list of lines
-#     lines = f.read().split('\n')
-#     # openai api key
-#     api_key = lines[1]
-#     # discord token
-#     DISCORD_TOKEN = lines[7]
-#     api_base = lines[9]
-# # close the file
-# f.close()
-
-
-# api_version = '2022-08-03-preview'
-
-# openai.api_type = "azure"
-# openai.api_version = "2023-03-15-preview"
-
-# # specifying our server
-# GUILD = "{ardubabe's server}"
-
-# # env variables to be read by railway
-# openai.api_key = api_key
-# openai.api_base = api_base
+# env variables to be read by railway
+openai.api_key = api_key
+openai.api_base = api_base
 
 @client.event
 async def on_ready():
@@ -78,7 +64,7 @@ async def on_message(message):
             )
             prompt = response.choices[0].message.content
 
-            url = "{}dalle/text-to-image?api-version={}".format(openai.api_base, openai.api_version)
+            url = "{}dalle/text-to-image?api-version={}".format(api_base, api_version)
             headers = {"api-key": api_key, "Content-Type": "application/json"}
             body = {
                 "caption": prompt,
