@@ -58,18 +58,19 @@ async def on_message(message):
 
 
             # DALL-E image generation function
-            def generate_dalle_image(caption):
+            async def generate_dalle_image(caption):
                 # url = f"{openai.api_base}dalle/text-to-image?api-version={openai.api_version}"
                 url = "{}dalle/text-to-image?api-version={}".format(openai.api_base, openai.api_version)
                 headers = {"api-key": openai.api_key, "Content-Type": "application/json"}
                 body = {
-                    #"caption": caption,
-                    "caption": dish_name,
+                    "caption": caption,
+                    #"caption": dish_name,
                     "resolution": "1024x1024"
                 }
                 submission = requests.post(url, headers=headers, json=body)
                 operation_location = submission.headers['Operation-Location']
                 print(submission.headers)
+                print(operation_location)
                 retry_after = submission.headers['Retry-after']
                 status = ""
                 while status != "Succeeded":
