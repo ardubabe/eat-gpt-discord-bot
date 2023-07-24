@@ -1,4 +1,5 @@
 # Working basic code where you can hard code a question and you get an answer
+# Using os to get the token, which is a cookie from Bard website
 
 from bardapi import Bard
 import os
