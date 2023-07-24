@@ -1,8 +1,10 @@
 # Working basic code where you can hard code a question and you get an answer
 
 from bardapi import Bard
+import os
+import requests
 
-token = ""
+token = os.environ.get("BARD_TOKEN")
 bard = Bard(token=token)
 res = bard.get_answer("What's the best mayo brand?")['content']
 print(res)
